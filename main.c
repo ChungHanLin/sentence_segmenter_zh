@@ -27,8 +27,8 @@ int main() {
     unsigned long leaf_count = 0;
     Sentence *sentence_head = NULL;
     
-    FILE *fp = fopen("/Users/lcha105u/Desktop/txt/ettoday.rec", "r");
-    FILE *fout = fopen("/Users/lcha105u/Desktop/txt/sort_ettoday.txt", "w");
+    FILE *fp = fopen("ettoday.rec", "r");
+    FILE *fout = fopen("sort_ettoday.txt", "w");
     
     while(fgets(buffer, MAX_BUFFER_SIZE, fp)){
         // 當遇到 @body 確認接下來為 新聞內容
