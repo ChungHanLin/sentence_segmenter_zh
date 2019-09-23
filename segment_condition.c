@@ -8,20 +8,40 @@
 
 #include "segment_condition.h"
 
+// 剔除 buffer 中的亂碼
+// (＊亂碼：當字元 ASCII <= 31 死或 = 127 時則視為控制字元，視為與 content 無關內容)
+void filter_garbled(char *line_buffer){
+    char *buffer_in, *buffer_out;
+    
+    buffer_in = buffer_out = line_buffer;
+    while(*buffer_in != '\0'){
+        if((*buffer_in <= 31 && *buffer_in >= 0) || *buffer_in == 127){
+            buffer_in++;
+        }
+        else{
+            *buffer_out = *buffer_in;
+            buffer_out++;
+            buffer_in++;
+        }
+        
+    }
+    *buffer_out = '\0';
+}
+
 // 對文章開頭進行過濾，刪除不必要字元
 char *filter_sentence_head(char *start_of_the_sentence_ptr){
     char *ptr = start_of_the_sentence_ptr;
     
     while(*ptr != '\0'){
-        if(*ptr == ' ' || *ptr == '>' || *ptr == '.' ||
-           *ptr == ',' || *ptr == ';' || *ptr == ':' ||
-           *ptr == '\n' || *ptr == '\t'){
+        if(*ptr == ' ' || *ptr == '>' || *ptr == '.' || *ptr == ',' ||
+           *ptr == ';' || *ptr == ':' || *ptr == '!' || *ptr == '?'){
             ptr++;
         }
         else if((strncmp("▲", ptr, 3) == 0) || (strncmp("►", ptr, 3) == 0) ||
                 (strncmp("▼", ptr, 3) == 0) || (strncmp("，", ptr, 3) == 0) ||
                 (strncmp("＞", ptr, 3) == 0) || (strncmp("、", ptr, 3) == 0) ||
-                (strncmp("：", ptr, 3) == 0) || (strncmp("　", ptr, 3) == 0)){
+                (strncmp("：", ptr, 3) == 0) || (strncmp("　", ptr, 3) == 0) ||
+                (strncmp("｀", ptr, 3) == 0) || (strncmp("；", ptr, 3) == 0)){
             ptr = ptr + 3;
         }
         else{
@@ -43,7 +63,8 @@ char *get_sentence_breakpoint(char *start_of_the_sentence_ptr){
         if((strncmp("。", end_of_the_sentence_ptr, 3) == 0) ||
            (strncmp("！", end_of_the_sentence_ptr, 3) == 0) ||
            (strncmp("？", end_of_the_sentence_ptr, 3) == 0) ||
-           (strncmp("...", end_of_the_sentence_ptr, 3) == 0)){
+           (strncmp("...", end_of_the_sentence_ptr, 3) == 0) ||
+           (strncmp("；", end_of_the_sentence_ptr, 3) == 0)){
             end_of_the_sentence_ptr += 3;
             if(extend_sentence == false){
                 extend_sentence = true;
@@ -55,17 +76,23 @@ char *get_sentence_breakpoint(char *start_of_the_sentence_ptr){
                 extend_sentence = true;
             }
         }
-        else if(strncmp("..", end_of_the_sentence_ptr, 2) == 0){
-            end_of_the_sentence_ptr += 2;
+        else if(*end_of_the_sentence_ptr == '.' || *end_of_the_sentence_ptr == '?' || *end_of_the_sentence_ptr == '!'){
+            end_of_the_sentence_ptr++;
             if(extend_sentence == false){
                 extend_sentence = true;
             }
         }
-        else if((extend_sentence == true) && (strncmp("」", end_of_the_sentence_ptr, 3) == 0 || strncmp("』", end_of_the_sentence_ptr, 3) == 0)){
-            end_of_the_sentence_ptr += 3;
-        }
         else if(extend_sentence == true){
-            break;
+                if((strncmp("」", end_of_the_sentence_ptr, 3) == 0) || (strncmp("』", end_of_the_sentence_ptr, 3) == 0) ||
+                   (strncmp("｣", end_of_the_sentence_ptr, 3) == 0)){
+                    end_of_the_sentence_ptr += 3;
+                }
+                else if(*end_of_the_sentence_ptr == '"' || *end_of_the_sentence_ptr == ' '){
+                    end_of_the_sentence_ptr++;
+                }
+                else{
+                    break;
+                }
         }
         else{
             end_of_the_sentence_ptr++;

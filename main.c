@@ -65,6 +65,9 @@ int main() {
                 continue;
             }
             else{
+                // 剔除 buffer 中的亂碼
+                // (＊亂碼：當字元 ASCII <= 31 死或 = 127 時則視為控制字元，視為與 content 無關內容)
+                filter_garbled(buffer);
                 start_of_the_sentence_ptr = buffer;
                 
                 // 執行完 segmenter 後，若 body_ptr 還不是指向 '\n'，則重複進行呼叫直到 buffer 所有資料皆被進行斷句處理
@@ -73,7 +76,8 @@ int main() {
                     // 對文章開頭進行過濾，刪除不必要字元
                     start_of_the_sentence_ptr = filter_sentence_head(start_of_the_sentence_ptr);
                     
-                    if(*start_of_the_sentence_ptr == '\n'){
+                    // 若回傳開頭為 '\0' or '\n' 時，則忽略該行
+                    if(*start_of_the_sentence_ptr == '\n' || *start_of_the_sentence_ptr == '\0'){
                         break;
                     }
                     

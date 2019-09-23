@@ -74,9 +74,12 @@ void inorder_and_free_memory(Sentence *sentence_ptr, FILE *fout){
     }
     
     inorder_and_free_memory(sentence_ptr->left, fout);
+    
+    // inorder 輸出檔案至 fout (指向 "sort_ettoday.txt" )
     fprintf(fout, "%lu\t%s\n", sentence_ptr->appearTime, sentence_ptr->content);
     inorder_and_free_memory(sentence_ptr->right, fout);
     
+    // postorder 將節點與 sentence 進行釋放記憶體
     free(sentence_ptr->content);
     free(sentence_ptr);
     
